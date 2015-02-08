@@ -6,17 +6,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import de.hetzge.logexplorer.model.Entity;
 import de.hetzge.logexplorer.model.IF_Entity;
 import de.hetzge.logexplorer.model.IF_Rule;
 import de.hetzge.logexplorer.model.RootRule;
@@ -64,7 +60,9 @@ public class EntityExplorer extends VBox implements Consumer<IF_Entity> {
 					} else {
 						if (subRule.check(entity)) {
 							EntityExplorerNode subRuleEntityExplorerNode = new EntityExplorerNode(subRule, subRuleValue);
-							treeItem.getChildren().add(subRuleEntityExplorerNode.treeItem);
+							Platform.runLater(() -> {
+								treeItem.getChildren().add(subRuleEntityExplorerNode.treeItem);
+							});
 							childsByValue.put(subRuleValue, subRuleEntityExplorerNode);
 							subRuleEntityExplorerNode.accept(entity);
 						}
@@ -80,10 +78,10 @@ public class EntityExplorer extends VBox implements Consumer<IF_Entity> {
 		public EntityExplorerNode childByValue(String value) {
 			return childsByValue.get(value);
 		}
-		
+
 		@Override
 		public String toString() {
-			return value;
+			return rule.toString() + ": " + value;
 		}
 
 	}
@@ -101,28 +99,21 @@ public class EntityExplorer extends VBox implements Consumer<IF_Entity> {
 
 		TreeView<EntityExplorerNode> treeView = new TreeView<EntityExplorerNode>();
 		treeView.setRoot(rootEntityExplorerNode.treeItem);
+		
+		treeView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+			ObservableList<IF_Entity> entities = newValue.getValue().entities;
+			for (IF_Entity entity : entities) {
+				System.out.println(entity);
+			}
+		});
 
 		getChildren().add(treeView);
-
-		Entity entity = new Entity();
-		entity.set("Entity", "Tree");
-		entity.set("Id", "10");
-		accept(entity);
-
-		Entity entity2 = new Entity();
-		entity2.set("Entity", "Building");
-		entity2.set("Id", "10");
-		accept(entity2);
-
-		Entity entity3 = new Entity();
-		entity3.set("Entity", "Building");
-		entity3.set("Id", "11");
-		accept(entity3);
 	}
 
 	@Override
 	public void accept(IF_Entity entity) {
 		rootEntityExplorerNode.accept(entity);
+
 	}
 
 }

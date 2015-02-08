@@ -26,4 +26,9 @@ public class RootRule implements IF_Rule {
 		subRules.add(rule);
 	}
 
+	@Override
+	public String toString() {
+		return "";
+	}
+	
 }

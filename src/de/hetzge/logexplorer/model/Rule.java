@@ -36,5 +36,10 @@ public class Rule implements IF_Rule {
 	public List<IF_Rule> getSubRules() {
 		return subRules;
 	}
+	
+	@Override
+	public String toString() {
+		return field;
+	}
 
 }
